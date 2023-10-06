@@ -1,1 +1,1 @@
-# cs3500-project
+# CS3500 Team Project
