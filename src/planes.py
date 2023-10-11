@@ -55,7 +55,7 @@ class Plane:
                 if self.speed <= 0.75:
                     self.acceleration_rate = 0
                 self.speed -= self.acceleration_rate
-                if self.canvas.coords(self.dot)[2] > 4:
+                if self.canvas.coords(self.dot)[2] - self.canvas.coords(self.dot)[0] > 5:
                     self.canvas.coords(self.dot, self.canvas.coords(self.dot)[0] + 0.1, self.canvas.coords(self.dot)[1] + 0.1, self.canvas.coords(self.dot)[2] - 0.1, self.canvas.coords(self.dot)[3] - 0.1)
         else:
             if not self.has_reached_finder:
