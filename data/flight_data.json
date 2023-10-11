@@ -201,16 +201,51 @@
     {
       "airline": "Aer Lingus",
       "aircraft": "Airbus A320",
+      "flight_number": "EI375",
+      "departure_airport": "LNZ",
+      "arrival_airport": "ORK"
+    },
+    {
+      "airline": "Kambodia Air",
+      "aircraft": "Airbus 7",
+      "flight_number": "KA000",
+      "departure_airport": "KBA",
+      "arrival_airport": "ORK"
+    },
+    {
+      "airline": "SpaceX",
+      "aircraft": "SpaceShip X35",
+      "flight_number": "SX789",
+      "departure_airport": "MNX",
+      "arrival_airport": "ORK"
+    },
+    {
+      "airline": "Aer Lingus",
+      "aircraft": "Airbus A320",
       "flight_number": "EI345",
       "departure_airport": "ZRH",
       "arrival_airport": "ORK"
     },
     {
-      "airline": "British Airways",
-      "aircraft": "Airbus A321",
-      "flight_number": "BA567",
-      "departure_airport": "PRG",
+      "airline": "Air France",
+      "aircraft": "Airbus A380",
+      "flight_number": "AF366",
+      "departure_airport": "MPL",
+      "arrival_airport": "ORK"
+    },
+    {
+      "airline": "Aer Lingus",
+      "aircraft": "Airbus A320",
+      "flight_number": "EI980",
+      "departure_airport": "BEL",
+      "arrival_airport": "ORK"
+    },
+    {
+      "airline": "Air Force One",
+      "aircraft": "Boeing 747",
+      "flight_number": "AF177",
+      "departure_airport": "WSH",
       "arrival_airport": "ORK"
     }
-    ]
+  ]
 }
