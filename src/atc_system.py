@@ -22,15 +22,40 @@ class ATCSimulator:
         #                                        fill="white")  # Airport rectangle
         self.planes = []
 
+        # Add a label for text above the Listbox
+        above_text = "Incoming Flights"
+        canvas.create_text(20, 10, text=above_text, font=("TkDefaultFont", 20), anchor=tk.NW)
+
+        listbox_height = 10
+        listbox_width = 16
+        self.incoming_flights_listbox = tk.Listbox(width=listbox_width, height=listbox_height)
+        self.incoming_flights_listbox.pack(side=tk.LEFT, anchor=tk.NW)
+        self.incoming_flights_listbox.place(x=20, y=40)  # Adjust the position as needed
+
     def create_plane(self):
         this_journey = random.choice(arrivals)
         aircraft = this_journey['aircraft']
         flight_number = this_journey['flight_number']
         origin = this_journey['departure_airport']
         destination = this_journey['arrival_airport']
+        # Inside the ATCSimulator class, where you create a new plane
         plane = Plane(self.canvas, self.finder1_x, self.finder1_y, self.airport_x, self.airport_y,
-                      aircraft, flight_number, origin, destination)
+                      aircraft, flight_number, origin, destination, self)
+
         self.planes.append(plane)
+        # Add the plane to the listbox
+        self.update_incoming_flights_list(flight_number, origin)
+
+    def remove_plane_from_listbox(self, plane):
+        # Remove the plane from the list box
+        flight_info = f"Flight {plane.flight_number} ({plane.origin})"
+        list_items = self.incoming_flights_listbox.get(0, tk.END)
+        if flight_info in list_items:
+            index = list_items.index(flight_info)
+            self.incoming_flights_listbox.delete(index)
+
+    def update_incoming_flights_list(self, flight_number, origin):
+        self.incoming_flights_listbox.insert(tk.END, f"Flight {flight_number} ({origin})")
 
     def update_planes(self):
         for plane in self.planes:
@@ -67,7 +92,7 @@ def main():
 
     def create_new_plane():
         atc_simulator.create_plane()
-        root.after(random.randint(5000, 15000), create_new_plane)
+        root.after(random.randint(10000, 25000), create_new_plane)
 
     create_new_plane()
     atc_simulator.update_planes()

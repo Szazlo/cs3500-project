@@ -5,7 +5,7 @@ import random
 
 class Plane:
     def __init__(self, canvas, finder1_x, finder1_y, airport_x, airport_y, aircraft, flight_number, origin,
-                 destination):
+                 destination, atc_simulator):
         self.canvas = canvas
         self.finder1_x, self.finder1_y = finder1_x, finder1_y
         self.airport_x, self.airport_y = airport_x, airport_y
@@ -13,6 +13,8 @@ class Plane:
         self.flight_number = flight_number
         self.origin = origin
         self.destination = destination
+        self.atc_simulator = atc_simulator
+
         initial_positions = [
             (random.randint(-self.canvas.winfo_screenwidth(), -20),
              random.randint(-self.canvas.winfo_screenheight(), self.canvas.winfo_screenheight() + 20)),
@@ -21,15 +23,22 @@ class Plane:
         ]
         self.x, self.y = random.choice(initial_positions)
         self.direction = random.uniform(0, 2 * math.pi)  # Random direction in radians
-        self.speed = random.uniform(3, 6)  # Random speed
+        self.speed = random.uniform(4, 6)  # Random speed
         self.dot = canvas.create_oval(self.x, self.y, self.x + 10, self.y + 10, fill="yellow")
         self.label = canvas.create_text(self.x + 15, self.y, anchor=tk.W,
                                         text=f"Flight {self.flight_number}\n{self.aircraft}\n{self.origin} to {self.destination}")
         self.has_reached_finder = False
         self.has_reached_airport = False
         self.acceleration_rate = 0.25
+        self.has_disappeared = False
 
     def move(self):
+        if self.has_reached_airport and not self.has_disappeared:
+            self.canvas.delete(self.dot)
+            self.canvas.delete(self.label)
+            self.has_disappeared = True
+            # Call the method to remove the plane from the listbox
+            self.atc_simulator.remove_plane_from_listbox(self)
         if not self.has_reached_finder:
             destination = (self.finder1_x, self.finder1_y)
         elif not self.has_reached_airport:
@@ -52,10 +61,10 @@ class Plane:
                     self.acceleration_rate = 0.05
                 else:
                     self.acceleration_rate = 0.005
-                if self.speed <= 0.75:
+                if self.speed <= 0.8:
                     self.acceleration_rate = 0
                 self.speed -= self.acceleration_rate
-                if self.canvas.coords(self.dot)[2] - self.canvas.coords(self.dot)[0] > 5:
+                if self.canvas.coords(self.dot)[2] - self.canvas.coords(self.dot)[0] > 7:
                     self.canvas.coords(self.dot, self.canvas.coords(self.dot)[0] + 0.1, self.canvas.coords(self.dot)[1] + 0.1, self.canvas.coords(self.dot)[2] - 0.1, self.canvas.coords(self.dot)[3] - 0.1)
         else:
             if not self.has_reached_finder:
