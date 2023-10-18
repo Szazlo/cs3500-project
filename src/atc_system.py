@@ -69,7 +69,7 @@ class ATCSimulator:
         self.update_outgoing_flights_list(flight_number, destination)
 
         # Remove the plane from the listbox after 20 seconds
-        self.root.after(30000, lambda: self.remove_outgoing_plane_from_listbox(out_plane))
+        self.root.after(15000, lambda: self.remove_outgoing_plane_from_listbox(out_plane))
 
     def remove_plane_from_listbox(self, plane):
         # Remove the plane from the list box
@@ -129,11 +129,11 @@ def main():
 
     def create_new_plane():
         atc_simulator.create_plane()
-        root.after(random.randint(25000, 40000), create_new_plane)
+        root.after(random.randint(15000, 30000), create_new_plane)
 
     def create_outgoing_plane():
         atc_simulator.create_outgoing_plane()
-        root.after(random.randint(30000, 50000), create_outgoing_plane)
+        root.after(random.randint(35000, 50000), create_outgoing_plane)
 
     create_new_plane()
     create_outgoing_plane()
