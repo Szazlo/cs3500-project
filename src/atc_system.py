@@ -30,18 +30,44 @@ class ATCSimulator:
         above_text = "Incoming Flights"
         canvas.create_text(20, 12, text=above_text, font=("TkDefaultFont", 20), anchor=tk.NW)
 
+        above_outgoing_text = "Departing Flights"
+        canvas.create_text(20, 235, text=above_outgoing_text, font=("TkDefaultFont", 20), anchor=tk.NW)
+
+        # Initialize a variable to keep track of the time of the last click
+        self.last_click_time = None
+
         listbox_height = 10
         listbox_width = 16
         self.incoming_flights_listbox = tk.Listbox(width=listbox_width, height=listbox_height)
         self.incoming_flights_listbox.pack(side=tk.LEFT, anchor=tk.NW)
         self.incoming_flights_listbox.place(x=20, y=40)  # Adjust the position as needed
 
-        above_outgoing_text = "Departing Flights"
-        canvas.create_text(20, 235, text=above_outgoing_text, font=("TkDefaultFont", 20), anchor=tk.NW)
-
         self.outgoing_flights_listbox = tk.Listbox(width=listbox_width, height=listbox_height)
         self.outgoing_flights_listbox.pack(side=tk.LEFT, anchor=tk.NW)
         self.outgoing_flights_listbox.place(x=20, y=260)
+
+        self.flight_details_label = tk.Label(self.canvas, text="", font=("TkDefaultFont", 16))
+        self.flight_details_label.pack(side=tk.LEFT, anchor=tk.NW)
+        self.flight_details_label.place(x=200, y=300)
+
+        # Bind the listbox selection event to the show_flight_details function
+        self.incoming_flights_listbox.bind("<<ListboxSelect>>", lambda event, flight_listbox=self.incoming_flights_listbox: self.show_flight_details(event, flight_listbox))
+        self.outgoing_flights_listbox.bind("<<ListboxSelect>>", lambda event, flight_listbox=self.outgoing_flights_listbox: self.show_flight_details(event, flight_listbox))
+
+    def show_flight_details(self, event, flight_listbox):
+        selected_flight_index = flight_listbox.curselection()
+        if selected_flight_index:
+            selected_flight_index = int(selected_flight_index[0])
+            selected_flight = flight_listbox.get(selected_flight_index)
+            self.flight_details_label.config(text=f"Selected Flight Details:\n{selected_flight}")
+
+            # Update the last click time
+            self.last_click_time = self.root.after(10000, self.hide_flight_details)
+
+    def hide_flight_details(self):
+        # Reset the flight details label
+        self.flight_details_label.config(text="")
+
 
     def create_plane(self):
         this_journey = random.choice(arrivals)
