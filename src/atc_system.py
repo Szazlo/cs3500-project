@@ -23,9 +23,18 @@ class ATCSimulator:
         #                                        fill="white")  # Airport rectangle
         self.planes = []
 
+        # Stop/Start Simulation
+        self.simulation_running = False
+
         # Add a label for text above the Listbox
         above_text = "Incoming Flights"
         canvas.create_text(20, 12, text=above_text, font=("TkDefaultFont", 20), anchor=tk.NW)
+
+        above_outgoing_text = "Departing Flights"
+        canvas.create_text(20, 235, text=above_outgoing_text, font=("TkDefaultFont", 20), anchor=tk.NW)
+
+        # Initialize a variable to keep track of the time of the last click
+        self.last_click_time = None
 
         listbox_height = 10
         listbox_width = 16
@@ -33,12 +42,32 @@ class ATCSimulator:
         self.incoming_flights_listbox.pack(side=tk.LEFT, anchor=tk.NW)
         self.incoming_flights_listbox.place(x=20, y=40)  # Adjust the position as needed
 
-        above_outgoing_text = "Departing Flights"
-        canvas.create_text(20, 235, text=above_outgoing_text, font=("TkDefaultFont", 20), anchor=tk.NW)
-
         self.outgoing_flights_listbox = tk.Listbox(width=listbox_width, height=listbox_height)
         self.outgoing_flights_listbox.pack(side=tk.LEFT, anchor=tk.NW)
         self.outgoing_flights_listbox.place(x=20, y=260)
+
+        self.flight_details_label = tk.Label(self.canvas, text="", font=("TkDefaultFont", 16))
+        self.flight_details_label.pack(side=tk.LEFT, anchor=tk.NW)
+        self.flight_details_label.place(x=200, y=300)
+
+        # Bind the listbox selection event to the show_flight_details function
+        self.incoming_flights_listbox.bind("<<ListboxSelect>>", lambda event, flight_listbox=self.incoming_flights_listbox: self.show_flight_details(event, flight_listbox))
+        self.outgoing_flights_listbox.bind("<<ListboxSelect>>", lambda event, flight_listbox=self.outgoing_flights_listbox: self.show_flight_details(event, flight_listbox))
+
+    def show_flight_details(self, event, flight_listbox):
+        selected_flight_index = flight_listbox.curselection()
+        if selected_flight_index:
+            selected_flight_index = int(selected_flight_index[0])
+            selected_flight = flight_listbox.get(selected_flight_index)
+            self.flight_details_label.config(text=f"Selected Flight Details:\n{selected_flight}")
+
+            # Update the last click time
+            self.last_click_time = self.root.after(10000, self.hide_flight_details)
+
+    def hide_flight_details(self):
+        # Reset the flight details label
+        self.flight_details_label.config(text="")
+
 
     def create_plane(self):
         this_journey = random.choice(arrivals)
@@ -94,14 +123,25 @@ class ATCSimulator:
         self.outgoing_flights_listbox.insert(tk.END, f"Flight {flight_number} ({destination})")
 
     def update_planes(self):
-        for plane in self.planes:
-            plane.move()
-        self.planes = [plane for plane in self.planes if (
-            # Remove planes that have reached the finder location
-            plane.x != self.finder1_x or plane.y != self.finder1_y)]
-        self.planes = [plane for plane in self.planes if (
-            plane.x != self.airport_x or plane.y != self.airport_y)]  # Remove planes that have reached the airport
-        self.root.after(100, self.update_planes)
+        if self.simulation_running:
+            for plane in self.planes:
+                plane.move()
+            self.planes = [plane for plane in self.planes if (
+                # Remove planes that have reached the finder location
+                    plane.x != self.finder1_x or plane.y != self.finder1_y)]
+            self.planes = [plane for plane in self.planes if (
+                    plane.x != self.airport_x or plane.y != self.airport_y)]  # Remove planes that have reached the airport
+            self.root.after(100, self.update_planes)
+
+    def start_simulation(self):
+        if not self.simulation_running:
+            self.simulation_running = True
+            print("Simulation started")  # Add this line
+            self.root.after(100, self.update_planes)  # Start updating planes after a short delay
+
+    def stop_simulation(self):
+        print("Simulation stopped")  # Add this line
+        self.simulation_running = False
 
 
 def main():
@@ -120,7 +160,7 @@ def main():
     canvas.pack()
 
     canvas.create_image(0, 0, anchor=tk.NW, image=background_photo)
-    canvas.image = background_photo  # Keep a reference to the image object to prevent it from being garbage collected
+    canvas.image = background_photo
 
     finder1_x, finder1_y = 760, 250
     finder2_x, finder2_y = 700, 100
@@ -134,6 +174,18 @@ def main():
     def create_outgoing_plane():
         atc_simulator.create_outgoing_plane()
         root.after(random.randint(35000, 50000), create_outgoing_plane)
+
+    control_panel = tk.Frame(root)
+    control_panel.pack(pady=10)
+
+    start_button = tk.Button(control_panel, text="Start Simulation", command=atc_simulator.start_simulation)
+    start_button.pack(side=tk.LEFT, padx=10, pady=10, anchor=tk.CENTER)
+
+    stop_button = tk.Button(control_panel, text="Stop Simulation", command=atc_simulator.stop_simulation)
+    stop_button.pack(side=tk.LEFT, padx=10, pady=10, anchor=tk.CENTER)
+
+    # Place the control panel on the canvas
+    control_panel.place(x=210, y=18)  # Adjust the position as needed
 
     create_new_plane()
     create_outgoing_plane()

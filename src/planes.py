@@ -24,7 +24,7 @@ class Plane:
 
         self.x, self.y = random.choice(initial_positions)
         self.direction = random.uniform(0, 2 * math.pi)  # Random direction in radians
-        self.speed = random.uniform(4, 6)  # Random speed
+        self.speed = random.uniform(5, 6)  # Random speed
         self.dot = canvas.create_oval(self.x, self.y, self.x + 10, self.y + 10, fill="yellow")
         self.label = canvas.create_text(self.x + 15, self.y, anchor=tk.W,
                                         text=f"Flight {self.flight_number}\n{self.aircraft}\n{self.origin} to {self.destination}")
@@ -86,12 +86,12 @@ class OutgoingPlane:
         self.destination = destination
         self.atc_simulator = atc_simulator
 
-        initial_positions = [airport_x, airport_y]
+        initial_positions = [airport_x-55, airport_y-150]
 
         self.x, self.y = initial_positions
         self.direction = random.uniform(0, 2 * math.pi)  # Random direction in radians
         self.speed = 0  # Initial speed set to 0
-        self.max_speed = random.uniform(4, 6)  # Random speed
+        self.max_speed = random.uniform(3, 5)
         self.dot = canvas.create_oval(self.x, self.y, self.x + 10, self.y + 10, fill="yellow")
         self.label = canvas.create_text(self.x + 15, self.y, anchor=tk.W,
                                         text=f"Flight {self.flight_number}\n{self.aircraft}\n{self.origin} to {self.destination}")
@@ -101,7 +101,7 @@ class OutgoingPlane:
         self.has_disappeared = False
 
     def move(self):
-        destination = (625, -200)  # Set the destination to the finder location
+        destination = (1090, 1200)  # Set the destination to the finder location
 
         # Calculate the angle to the destination
         angle_to_destination = math.atan2(destination[1] - self.y, destination[0] - self.x)
