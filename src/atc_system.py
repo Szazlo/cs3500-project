@@ -1,5 +1,6 @@
 import tkinter as tk
 import random
+from tkinter import font
 from PIL import Image, ImageTk
 import json
 from planes import Plane, OutgoingPlane
@@ -17,10 +18,6 @@ class ATCSimulator:
         self.finder1_x, self.finder1_y = finder1_x, finder1_y
         self.finder2_x, self.finder2_y = finder2_x, finder2_y
         self.airport_x, self.airport_y = airport_x, airport_y
-        # self.finder = canvas.create_rectangle(finder1_x - 5, finder1_y - 5, finder1_x + 5, finder1_y + 5,
-        #                                       fill="white")  # Finder rectangle
-        # self.airport = canvas.create_rectangle(airport_x - 5, airport_y - 5, airport_x + 5, airport_y + 5,
-        #                                        fill="white")  # Airport rectangle
         self.planes = []
 
         # Stop/Start Simulation
@@ -46,28 +43,56 @@ class ATCSimulator:
         self.outgoing_flights_listbox.pack(side=tk.LEFT, anchor=tk.NW)
         self.outgoing_flights_listbox.place(x=20, y=260)
 
+        # Flight details label
         self.flight_details_label = tk.Label(self.canvas, text="", font=("TkDefaultFont", 16))
         self.flight_details_label.pack(side=tk.LEFT, anchor=tk.NW)
         self.flight_details_label.place(x=200, y=300)
 
+        # Control panel
+        self.control_panel = tk.Frame(root)
+
+        # Place the control panel and flight details label on the canvas
+        self.control_panel.place(x=210, y=18)  # Adjust the position as needed
+        self.flight_details_label.place(x=210, y=60)  # Adjust the position as needed
+
         # Bind the listbox selection event to the show_flight_details function
         self.incoming_flights_listbox.bind("<<ListboxSelect>>", lambda event, flight_listbox=self.incoming_flights_listbox: self.show_flight_details(event, flight_listbox))
         self.outgoing_flights_listbox.bind("<<ListboxSelect>>", lambda event, flight_listbox=self.outgoing_flights_listbox: self.show_flight_details(event, flight_listbox))
+
+    # ... (rest of the code)
 
     def show_flight_details(self, event, flight_listbox):
         selected_flight_index = flight_listbox.curselection()
         if selected_flight_index:
             selected_flight_index = int(selected_flight_index[0])
             selected_flight = flight_listbox.get(selected_flight_index)
-            self.flight_details_label.config(text=f"Selected Flight Details:\n{selected_flight}")
 
-            # Update the last click time
-            self.last_click_time = self.root.after(10000, self.hide_flight_details)
+            # Extract flight number and origin from the selected flight
+            flight_info = selected_flight.split()
+            flight_number = flight_info[1]
+            origin = flight_info[2][1:-1]  # Remove parentheses
+
+            # Find the corresponding plane in the planes list
+            for plane in self.planes:
+                if plane.flight_number == flight_number and plane.origin == origin:
+                    # Display additional details in the flight details label
+                    details_text = "Selected Flight Details:\n"
+                    details_text += f"Flight Number: {plane.flight_number}\n"
+                    details_text += f"Destination: {plane.destination}\n"
+                    details_text += f"Origin: {plane.origin}\n"
+                    # Remove the line below as "airline" is not an attribute of Plane
+                    # details_text += f"Airline: {plane.airline}\n"
+                    details_text += f"Aircraft: {plane.aircraft}"
+
+                    # Configure label with bold title and regular text, left alignment
+                    self.flight_details_label.config(text=details_text, font=("TkDefaultFont", 15, "bold"), anchor="w")
+
+                    # Update the last click time
+                    self.last_click_time = self.root.after(10000, self.hide_flight_details)
 
     def hide_flight_details(self):
         # Reset the flight details label
         self.flight_details_label.config(text="")
-
 
     def create_plane(self):
         this_journey = random.choice(arrivals)
