@@ -125,21 +125,22 @@ class ATCSimulator:
         """
         selected_flight_index = flight_listbox.curselection()  # Get the index of the selected flight
         if selected_flight_index:
-            selected_flight_index = int(selected_flight_index[0])
-            selected_flight = flight_listbox.get(selected_flight_index)
+            size = self.root.winfo_screenwidth()
+            selected_flight = flight_listbox.get(selected_flight_index)  # Get the flight from the listbox
+            flight_number = selected_flight.split()[1]  # Get the flight number from the flight
+            for flight in arrivals:
+                if flight['flight_number'] == flight_number:
+                    flight_details = f"Flight Details\nFlight No:{flight['flight_number']}\n{flight['aircraft']}\n{flight['departure_airport']} to {flight['arrival_airport']}"
+                    break
+            else:
+                for flight in departures:
+                    if flight['flight_number'] == flight_number:
+                        flight_details = f"Flight Details\nFlight No:{flight['flight_number']}\n{flight['aircraft']}\n{flight['departure_airport']} to {flight['arrival_airport']}"
+                        break
+            self.flight_details_label.place(x=size - 180, y=75, anchor=tk.NW)
+            self.flight_details_label.config(text=flight_details)
+            self.root.after(10000, self.hide_flight_details)
 
-            flight_info = selected_flight.split()
-            flight_number, origin, destination = flight_info[1], flight_info[2][1:-1], flight_info[4][:-1]
-
-            for plane in self.planes:  # Find the plane with the same flight number, origin and destination
-                if plane.flight_number == flight_number and plane.origin == origin and plane.destination == destination:
-                    details_text = f"Selected Flight Details:\nFlight Number: {plane.flight_number}\n"
-                    details_text += f"Destination: {plane.destination}\nOrigin: {plane.origin}\n"
-                    details_text += f"Aircraft: {plane.aircraft}"
-
-                    self.flight_details_label.config(text=details_text, font=("TkDefaultFont", 15, "bold"), anchor="w")
-                    self.last_click_time = self.root.after(10000,
-                                                           self.hide_flight_details)  # Hide the flight details after 10 seconds
 
     def hide_flight_details(self):
         """Hide the flight details"""
