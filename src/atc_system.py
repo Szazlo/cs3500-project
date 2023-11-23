@@ -43,7 +43,7 @@ class ATCSimulator:
         self.finder2_x, self.finder2_y = finder2_x, finder2_y
         self.airport_x, self.airport_y = airport_x, airport_y
         self.planes = []
-        self.simulation_running = False
+        self.simulation_running = True
         self.last_click_time = None
 
         self.setup_gui()
@@ -112,6 +112,7 @@ class ATCSimulator:
     def setup_buttons(self):
         """Add buttons to Out-items in the listboxes"""
 
+        '''Print statement for debugging'''
         def button_callback():
             print("Button clicked!")
 
@@ -242,12 +243,16 @@ def main():
     atc_simulator = ATCSimulator(root, canvas, finder1_x, finder1_y, finder2_x, finder2_y, airport_x, airport_y)
 
     def create_new_plane(): # Schedule a new plane to be created
-        atc_simulator.create_plane()
-        root.after(random.randint(15000, 30000), create_new_plane)
+        # Stops generating when simulation is paused
+        if atc_simulator.simulation_running:
+            atc_simulator.create_plane()
+            root.after(random.randint(15000, 30000), create_new_plane)
 
     def create_outgoing_plane(): # Schedule a new outgoing plane to be created
-        atc_simulator.create_outgoing_plane()
-        root.after(random.randint(35000, 50000), create_outgoing_plane)
+        # Stops generating when simulation is paused
+        if atc_simulator.simulation_running:
+            atc_simulator.create_outgoing_plane()
+            root.after(random.randint(35000, 50000), create_outgoing_plane)
 
     control_panel = tk.Frame(root)
     control_panel.pack(pady=10)
