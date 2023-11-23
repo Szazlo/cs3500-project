@@ -43,7 +43,7 @@ class ATCSimulator:
         self.finder2_x, self.finder2_y = finder2_x, finder2_y
         self.airport_x, self.airport_y = airport_x, airport_y
         self.planes = []
-        self.simulation_running = False
+        self.simulation_running = True
         self.last_click_time = None
 
         self.setup_gui()
@@ -91,7 +91,7 @@ class ATCSimulator:
         """Attach the label for the flight details"""
         self.flight_details_label = ttk.Label(self.canvas, text="", font=("TkDefaultFont", 16))
         self.flight_details_label.pack(side=tk.LEFT, anchor=tk.NW)
-        self.flight_details_label.place(x=500, y=400)
+        self.flight_details_label.place(x=200, y=300)
 
     def setup_control_panel(self):
         """Setup the control panel for pausing and resuming the simulation"""
@@ -112,6 +112,7 @@ class ATCSimulator:
     def setup_buttons(self):
         """Add buttons to Out-items in the listboxes"""
 
+        '''Print statement for debugging'''
         def button_callback():
             print("Button clicked!")
 
@@ -124,25 +125,21 @@ class ATCSimulator:
         """
         selected_flight_index = flight_listbox.curselection()  # Get the index of the selected flight
         if selected_flight_index:
-            # get window size
-            size = self.root.winfo_screenwidth()
-            self.flight_details_label.place(x=size - 170, y=75)
-            flight_number = flight_listbox.get(selected_flight_index)
-            flight_number = flight_number.split(" ")[1]
-            flight_details = self.get_flight_details(flight_number)
-            self.flight_details_label.config(text=flight_details)
-            self.root.after(10000, self.hide_flight_details)
+            selected_flight_index = int(selected_flight_index[0])
+            selected_flight = flight_listbox.get(selected_flight_index)
 
-    def get_flight_details(self, flight_number):
-        """Get the flight details for the selected flight"""
-        for flight in arrivals:
-            if flight['flight_number'] == flight_number:
-                return (
-                    f"Flight Details\nFlight no:{flight['flight_number']}\n{flight['aircraft']}\n{flight['departure_airport']} to {flight['arrival_airport']}")
-        for flight in departures:
-            if flight['flight_number'] == flight_number:
-                return f"Flight Details\nFlight no:{flight['flight_number']}\n{flight['aircraft']}\n{flight['departure_airport']} to {flight['arrival_airport']}"
-        return ""
+            flight_info = selected_flight.split()
+            flight_number, origin, destination = flight_info[1], flight_info[2][1:-1], flight_info[4][:-1]
+
+            for plane in self.planes:  # Find the plane with the same flight number, origin and destination
+                if plane.flight_number == flight_number and plane.origin == origin and plane.destination == destination:
+                    details_text = f"Selected Flight Details:\nFlight Number: {plane.flight_number}\n"
+                    details_text += f"Destination: {plane.destination}\nOrigin: {plane.origin}\n"
+                    details_text += f"Aircraft: {plane.aircraft}"
+
+                    self.flight_details_label.config(text=details_text, font=("TkDefaultFont", 15, "bold"), anchor="w")
+                    self.last_click_time = self.root.after(10000,
+                                                           self.hide_flight_details)  # Hide the flight details after 10 seconds
 
     def hide_flight_details(self):
         """Hide the flight details"""
@@ -245,13 +242,17 @@ def main():
     # Create the ATC Simulator
     atc_simulator = ATCSimulator(root, canvas, finder1_x, finder1_y, finder2_x, finder2_y, airport_x, airport_y)
 
-    def create_new_plane():  # Schedule a new plane to be created
-        atc_simulator.create_plane()
-        root.after(random.randint(15000, 30000), create_new_plane)
+    def create_new_plane(): # Schedule a new plane to be created
+        # Stops generating when simulation is paused
+        if atc_simulator.simulation_running:
+            atc_simulator.create_plane()
+            root.after(random.randint(15000, 30000), create_new_plane)
 
-    def create_outgoing_plane():  # Schedule a new outgoing plane to be created
-        atc_simulator.create_outgoing_plane()
-        root.after(random.randint(35000, 50000), create_outgoing_plane)
+    def create_outgoing_plane(): # Schedule a new outgoing plane to be created
+        # Stops generating when simulation is paused
+        if atc_simulator.simulation_running:
+            atc_simulator.create_outgoing_plane()
+            root.after(random.randint(35000, 50000), create_outgoing_plane)
 
     control_panel = tk.Frame(root)
     control_panel.pack(pady=10)
