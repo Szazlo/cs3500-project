@@ -7,14 +7,15 @@ class Plane:
     def __init__(self, canvas, finder1_x, finder1_y, airport_x, airport_y, aircraft, flight_number, origin,
                  destination, atc_simulator):
         self.canvas = canvas
-        self.finder1_x, self.finder1_y = finder1_x, finder1_y
-        self.airport_x, self.airport_y = airport_x, airport_y
+        self.finder1_x, self.finder1_y = finder1_x, finder1_y  # Catcher coordinates to slow down the plane
+        self.airport_x, self.airport_y = airport_x, airport_y  # Airport coordinates to land the plane
         self.aircraft = aircraft
         self.flight_number = flight_number
         self.origin = origin
         self.destination = destination
         self.atc_simulator = atc_simulator
 
+        # Spawn Positions
         initial_positions = [
             (random.randint(-self.canvas.winfo_screenwidth(), -20),
              random.randint(-self.canvas.winfo_screenheight(), self.canvas.winfo_screenheight() + 20)),
@@ -34,22 +35,24 @@ class Plane:
         self.has_disappeared = False
 
     def move(self):
-        if self.has_reached_airport and not self.has_disappeared:
+        if self.has_reached_airport and not self.has_disappeared: # If the plane has reached the airport and still in
+            # list; remove
             self.canvas.delete(self.dot)
             self.canvas.delete(self.label)
             self.has_disappeared = True
             # Call the method to remove the plane from the listbox
             self.atc_simulator.remove_plane_from_listbox(self)
-        if not self.has_reached_finder:
+        if not self.has_reached_finder: # If the plane has not reached the finder, set the destination to the finder
             destination = (self.finder1_x, self.finder1_y)
-        elif not self.has_reached_airport:
+        elif not self.has_reached_airport: # If the plane has reached the finder, set the destination to the airport
             destination = (self.airport_x, self.airport_y)
         else:
             self.canvas.delete(self.dot)
             self.canvas.delete(self.label)
             return
 
-        if math.dist((self.x, self.y), destination) > 5:
+        if math.dist((self.x, self.y), destination) > 5: # If the plane has not reached the destination
+            # Calculate trajectory to destination
             angle_to_destination = math.atan2(destination[1] - self.y, destination[0] - self.x)
             dx = self.speed * math.cos(angle_to_destination)
             dy = self.speed * math.sin(angle_to_destination)
@@ -58,6 +61,7 @@ class Plane:
             self.x += dx
             self.y += dy
             if self.has_reached_finder:
+                # Gradually slow down the plane when it reaches the finder, to reach landing speed
                 if self.speed >= 2:
                     self.acceleration_rate = 0.05
                 else:
@@ -66,8 +70,10 @@ class Plane:
                     self.acceleration_rate = 0
                 self.speed -= self.acceleration_rate
                 if self.canvas.coords(self.dot)[2] - self.canvas.coords(self.dot)[0] > 7:
-                    self.canvas.coords(self.dot, self.canvas.coords(self.dot)[0] + 0.1, self.canvas.coords(self.dot)[1] + 0.1, self.canvas.coords(self.dot)[2] - 0.1, self.canvas.coords(self.dot)[3] - 0.1)
-        else:
+                    self.canvas.coords(self.dot, self.canvas.coords(self.dot)[0] + 0.1,
+                                       self.canvas.coords(self.dot)[1] + 0.1, self.canvas.coords(self.dot)[2] - 0.1,
+                                       self.canvas.coords(self.dot)[3] - 0.1)
+        else: # set plane status positions
             if not self.has_reached_finder:
                 self.has_reached_finder = True
             elif not self.has_reached_airport:
@@ -86,7 +92,7 @@ class OutgoingPlane:
         self.destination = destination
         self.atc_simulator = atc_simulator
 
-        initial_positions = [airport_x-55, airport_y-150]
+        initial_positions = [airport_x - 55, airport_y - 150]
 
         self.x, self.y = initial_positions
         self.direction = random.uniform(0, 2 * math.pi)  # Random direction in radians
@@ -116,5 +122,3 @@ class OutgoingPlane:
         self.canvas.move(self.label, dx, dy)
         self.x += dx
         self.y += dy
-
-
