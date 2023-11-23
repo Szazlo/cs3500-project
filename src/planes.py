@@ -1,6 +1,6 @@
-import tkinter as tk
 import math
 import random
+import tkinter as tk
 
 
 class Plane:
@@ -35,23 +35,23 @@ class Plane:
         self.has_disappeared = False
 
     def move(self):
-        if self.has_reached_airport and not self.has_disappeared: # If the plane has reached the airport and still in
+        if self.has_reached_airport and not self.has_disappeared:  # If the plane has reached the airport and still in
             # list; remove
             self.canvas.delete(self.dot)
             self.canvas.delete(self.label)
             self.has_disappeared = True
             # Call the method to remove the plane from the listbox
             self.atc_simulator.remove_plane_from_listbox(self)
-        if not self.has_reached_finder: # If the plane has not reached the finder, set the destination to the finder
+        if not self.has_reached_finder:  # If the plane has not reached the finder, set the destination to the finder
             destination = (self.finder1_x, self.finder1_y)
-        elif not self.has_reached_airport: # If the plane has reached the finder, set the destination to the airport
+        elif not self.has_reached_airport:  # If the plane has reached the finder, set the destination to the airport
             destination = (self.airport_x, self.airport_y)
         else:
             self.canvas.delete(self.dot)
             self.canvas.delete(self.label)
             return
 
-        if math.dist((self.x, self.y), destination) > 5: # If the plane has not reached the destination
+        if math.dist((self.x, self.y), destination) > 5:  # If the plane has not reached the destination
             # Calculate trajectory to destination
             angle_to_destination = math.atan2(destination[1] - self.y, destination[0] - self.x)
             dx = self.speed * math.cos(angle_to_destination)
@@ -73,7 +73,7 @@ class Plane:
                     self.canvas.coords(self.dot, self.canvas.coords(self.dot)[0] + 0.1,
                                        self.canvas.coords(self.dot)[1] + 0.1, self.canvas.coords(self.dot)[2] - 0.1,
                                        self.canvas.coords(self.dot)[3] - 0.1)
-        else: # set plane status positions
+        else:  # set plane status positions
             if not self.has_reached_finder:
                 self.has_reached_finder = True
             elif not self.has_reached_airport:
