@@ -33,6 +33,7 @@ class Plane:
         self.has_reached_airport = False
         self.acceleration_rate = 0.25
         self.has_disappeared = False
+        self.status = "Delayed" if random.random() < 0.2 else "On time"
 
     def move(self):
         if self.has_reached_airport and not self.has_disappeared:  # If the plane has reached the airport and still in
@@ -75,8 +76,10 @@ class Plane:
                                        self.canvas.coords(self.dot)[3] - 0.1)
         else:  # set plane status positions
             if not self.has_reached_finder:
+                self.status = "Landing"
                 self.has_reached_finder = True
             elif not self.has_reached_airport:
+                self.status = "Taxiing"
                 self.has_reached_airport = True
 
 
@@ -106,11 +109,13 @@ class OutgoingPlane:
         self.has_disappeared = False
         self.approved = False
         self.delayed = 0
+        self.status = "Taxiing"
 
     def taxi(self):
         self.dot = self.canvas.create_oval(self.x, self.y, self.x + 10, self.y + 10, fill="yellow")
         self.label = self.canvas.create_text(self.x + 15, self.y, anchor=tk.W,
                                         text=f"Flight {self.flight_number}\n{self.aircraft}\n{self.origin} to {self.destination}")
+        self.status = "Taking off"
     def move(self):
         if self.approved:
             destination = (1090, 1200)  # Set the destination to the finder location

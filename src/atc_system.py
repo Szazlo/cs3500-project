@@ -106,32 +106,31 @@ class ATCSimulator:
             size = self.root.winfo_screenwidth()
             selected_flight = flight_listbox.get(selected_flight_index)  # Get the flight from the listbox
             flight_number = selected_flight.split()[1]  # Get the flight number from the flight
+            for p in self.planes:
+                if p.flight_number == flight_number:
+                    plane = p
+                    break
             for flight in arrivals:
                 if flight['flight_number'] == flight_number:
-                    flight_details = f"Flight Details\nFlight No:{flight['flight_number']}\n{flight['aircraft']}\n{flight['departure_airport']} to {flight['arrival_airport']}"
+                    flight_details = f"Flight Details\nFlight No:{flight['flight_number']}\n{flight['aircraft']}\n{flight['departure_airport']} to {flight['arrival_airport']}\nSpeed: {round(plane.speed*28,2)} Knts\nStatus: {plane.status}"
                     break
             else:
                 for flight in departures:
                     if flight['flight_number'] == flight_number:
-                        flight_details = f"Flight Details\nFlight No:{flight['flight_number']}\n{flight['aircraft']}\n{flight['departure_airport']} to {flight['arrival_airport']}"
+                        flight_details = f"Flight Details\nFlight No:{flight['flight_number']}\n{flight['aircraft']}\n{flight['departure_airport']} to {flight['arrival_airport']}\nSpeed: {round(plane.speed*28,2)} Knts\nStatus: {plane.status}"
                         departure = True
                         break
             self.flight_details_label.place(x=250, y=12, anchor=tk.NW)
             self.flight_details_label.config(text=flight_details)
 
-            for p in self.planes:
-                if p.flight_number == flight_number:
-                    plane = p
-                    break
-
             # Create a button inside the text box
             if plane.origin == "ORK":
                 approve = ttk.Button(self.root, text="Approve",
                                      command=lambda num=flight_number: self.approve_flight(plane))
-                approve.place(x=250, y=115, anchor=tk.NW)
+                approve.place(x=250, y=165, anchor=tk.NW)
                 delay = ttk.Button(self.root, text="Delay",
                                    command=lambda num=flight_number: self.delay(plane))
-                delay.place(x=250, y=145, anchor=tk.NW)
+                delay.place(x=250, y=195, anchor=tk.NW)
                 self.root.after(5000, lambda: approve.destroy())
                 self.root.after(5000, lambda: delay.destroy())
 
@@ -152,6 +151,7 @@ class ATCSimulator:
         plane.delayed += 1
         if plane.delayed == 3:
             print(f"Flight {plane.flight_number} has been delayed 3 times. It will now be cancelled.")
+            self.remove_outgoing_plane_from_listbox(plane)
 
     def create_plane(self):
         """Schedule a new arrival plane"""
