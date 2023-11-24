@@ -98,27 +98,33 @@ class OutgoingPlane:
         self.direction = random.uniform(0, 2 * math.pi)  # Random direction in radians
         self.speed = 0  # Initial speed set to 0
         self.max_speed = random.uniform(3, 5)
-        self.dot = canvas.create_oval(self.x, self.y, self.x + 10, self.y + 10, fill="yellow")
-        self.label = canvas.create_text(self.x + 15, self.y, anchor=tk.W,
-                                        text=f"Flight {self.flight_number}\n{self.aircraft}\n{self.origin} to {self.destination}")
+        self.dot = None
+        self.label = None
         self.has_reached_finder = False
         self.has_reached_airport = False
         self.acceleration_rate = 0.25
         self.has_disappeared = False
+        self.approved = False
+        self.delayed = 0
 
+    def taxi(self):
+        self.dot = self.canvas.create_oval(self.x, self.y, self.x + 10, self.y + 10, fill="yellow")
+        self.label = self.canvas.create_text(self.x + 15, self.y, anchor=tk.W,
+                                        text=f"Flight {self.flight_number}\n{self.aircraft}\n{self.origin} to {self.destination}")
     def move(self):
-        destination = (1090, 1200)  # Set the destination to the finder location
+        if self.approved:
+            destination = (1090, 1200)  # Set the destination to the finder location
 
-        # Calculate the angle to the destination
-        angle_to_destination = math.atan2(destination[1] - self.y, destination[0] - self.x)
+            # Calculate the angle to the destination
+            angle_to_destination = math.atan2(destination[1] - self.y, destination[0] - self.x)
 
-        # Accelerate the plane until it reaches the maximum speed
-        if self.speed < self.max_speed:
-            self.speed += self.acceleration_rate
+            # Accelerate the plane until it reaches the maximum speed
+            if self.speed < self.max_speed:
+                self.speed += self.acceleration_rate
 
-        dx = self.speed * math.cos(angle_to_destination)
-        dy = self.speed * math.sin(angle_to_destination)
-        self.canvas.move(self.dot, dx, dy)
-        self.canvas.move(self.label, dx, dy)
-        self.x += dx
-        self.y += dy
+            dx = self.speed * math.cos(angle_to_destination)
+            dy = self.speed * math.sin(angle_to_destination)
+            self.canvas.move(self.dot, dx, dy)
+            self.canvas.move(self.label, dx, dy)
+            self.x += dx
+            self.y += dy

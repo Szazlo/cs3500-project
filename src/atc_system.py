@@ -20,6 +20,7 @@ class CustomListbox(tk.Listbox):
         super().__init__(master, **kwargs)
         self.buttons = {}  # Dictionary to store buttons for each item
 
+
 class ATCSimulator:
     """Class to manage the ATC Simulator GUI"""
 
@@ -99,6 +100,7 @@ class ATCSimulator:
         """Show the flight details for the selected flight.
         Duration of 10 seconds.
         """
+        # destroy buttons and hide flight details
         selected_flight_index = flight_listbox.curselection()  # Get the index of the selected flight
         if selected_flight_index:
             size = self.root.winfo_screenwidth()
@@ -112,14 +114,44 @@ class ATCSimulator:
                 for flight in departures:
                     if flight['flight_number'] == flight_number:
                         flight_details = f"Flight Details\nFlight No:{flight['flight_number']}\n{flight['aircraft']}\n{flight['departure_airport']} to {flight['arrival_airport']}"
+                        departure = True
                         break
-            self.flight_details_label.place(x=size - 180, y=75, anchor=tk.NW)
+            self.flight_details_label.place(x=250, y=12, anchor=tk.NW)
             self.flight_details_label.config(text=flight_details)
-            self.root.after(10000, self.hide_flight_details)
+
+            for p in self.planes:
+                if p.flight_number == flight_number:
+                    plane = p
+                    break
+
+            # Create a button inside the text box
+            if plane.origin == "ORK":
+                approve = ttk.Button(self.root, text="Approve",
+                                     command=lambda num=flight_number: self.approve_flight(plane))
+                approve.place(x=250, y=115, anchor=tk.NW)
+                delay = ttk.Button(self.root, text="Delay",
+                                   command=lambda num=flight_number: self.delay(plane))
+                delay.place(x=250, y=145, anchor=tk.NW)
+                self.root.after(5000, lambda: approve.destroy())
+                self.root.after(5000, lambda: delay.destroy())
+
+            self.root.after(5000, self.hide_flight_details)
 
     def hide_flight_details(self):
         """Hide the flight details"""
         self.flight_details_label.config(text="")
+
+    def approve_flight(self, plane):
+        """Approve the flight"""
+        plane.taxi()
+        plane.approved = True
+        self.remove_outgoing_plane_from_listbox(plane)
+
+    def delay(self, plane):
+        """Delay the flight"""
+        plane.delayed += 1
+        if plane.delayed == 3:
+            print(f"Flight {plane.flight_number} has been delayed 3 times. It will now be cancelled.")
 
     def create_plane(self):
         """Schedule a new arrival plane"""
@@ -146,7 +178,6 @@ class ATCSimulator:
         self.update_outgoing_flights_list(flight_number, destination)
         # Remove the plane from the outgoing flights listbox after 15 seconds
         # (enough time for the plane to go off-screen)
-        self.root.after(15000, lambda: self.remove_outgoing_plane_from_listbox(out_plane))
 
     def remove_plane_from_listbox(self, plane):
         """Remove the plane from the listbox"""
@@ -162,7 +193,7 @@ class ATCSimulator:
         list_items = self.outgoing_flights_listbox.get(0, tk.END)
         if flight_info in list_items:
             index = list_items.index(flight_info)
-            self.outgoing_flights_listbox.delete(index)
+            self.root.after(5000, lambda: self.outgoing_flights_listbox.delete(index))
 
     # Update the listboxes for in/out flights
     def update_incoming_flights_list(self, flight_number, origin):
