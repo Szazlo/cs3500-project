@@ -20,19 +20,6 @@ class CustomListbox(tk.Listbox):
         super().__init__(master, **kwargs)
         self.buttons = {}  # Dictionary to store buttons for each item
 
-    def add_button(self, item, callback):
-        frame = tk.Frame(self)
-        frame.pack(fill=tk.X)
-
-        label = tk.Label(frame, text=item, anchor=tk.W)
-        label.pack(side=tk.LEFT, fill=tk.X)
-
-        button = tk.Button(frame, text="Button", command=callback)
-        button.pack(side=tk.RIGHT, padx=5)
-
-        self.buttons[item] = button
-
-
 class ATCSimulator:
     """Class to manage the ATC Simulator GUI"""
 
@@ -55,7 +42,6 @@ class ATCSimulator:
         self.setup_flight_details_label()
         self.setup_control_panel()
         self.setup_listbox_callbacks()
-        self.setup_buttons()
 
     def setup_labels(self):
         """Setup the labels for the GUI"""
@@ -97,7 +83,7 @@ class ATCSimulator:
         """Setup the control panel for pausing and resuming the simulation"""
         control_panel = ttk.Frame(self.root)
         #   position the control panel in the top right corner, relative to the screen size
-        control_panel.place(x=self.root.winfo_screenwidth() - 250, y=10)
+        control_panel.place(x=20, y=200)
         self.control_panel = control_panel
 
     def setup_listbox_callbacks(self):
@@ -108,16 +94,6 @@ class ATCSimulator:
         self.outgoing_flights_listbox.bind("<<ListboxSelect>>", lambda event,
                                                                        flight_listbox=self.outgoing_flights_listbox: self.show_flight_details(
             event, flight_listbox))
-
-    def setup_buttons(self):
-        """Add buttons to Out-items in the listboxes"""
-
-        '''Print statement for debugging'''
-        def button_callback():
-            print("Button clicked!")
-
-        for item in self.outgoing_flights_listbox.get(0, tk.END):
-            self.outgoing_flights_listbox.add_button(item, button_callback)
 
     def show_flight_details(self, event, flight_listbox):
         """Show the flight details for the selected flight.
@@ -140,7 +116,6 @@ class ATCSimulator:
             self.flight_details_label.place(x=size - 180, y=75, anchor=tk.NW)
             self.flight_details_label.config(text=flight_details)
             self.root.after(10000, self.hide_flight_details)
-
 
     def hide_flight_details(self):
         """Hide the flight details"""
@@ -243,29 +218,26 @@ def main():
     # Create the ATC Simulator
     atc_simulator = ATCSimulator(root, canvas, finder1_x, finder1_y, finder2_x, finder2_y, airport_x, airport_y)
 
-    def create_new_plane(): # Schedule a new plane to be created
+    def create_new_plane():  # Schedule a new plane to be created
         # Stops generating when simulation is paused
         if atc_simulator.simulation_running:
             atc_simulator.create_plane()
             root.after(random.randint(15000, 30000), create_new_plane)
 
-    def create_outgoing_plane(): # Schedule a new outgoing plane to be created
+    def create_outgoing_plane():  # Schedule a new outgoing plane to be created
         # Stops generating when simulation is paused
         if atc_simulator.simulation_running:
             atc_simulator.create_outgoing_plane()
             root.after(random.randint(35000, 50000), create_outgoing_plane)
 
+    # Create the control panel
     control_panel = tk.Frame(root)
     control_panel.pack(pady=10)
-
-    start_button = tk.Button(control_panel, text="Start Simulation", command=atc_simulator.start_simulation)
+    start_button = tk.Button(control_panel, text="Resume", command=atc_simulator.start_simulation)
     start_button.pack(side=tk.LEFT, padx=10, pady=10, anchor=tk.CENTER)
-
-    stop_button = tk.Button(control_panel, text="Stop Simulation", command=atc_simulator.stop_simulation)
+    stop_button = tk.Button(control_panel, text="Stop", command=atc_simulator.stop_simulation)
     stop_button.pack(side=tk.LEFT, padx=10, pady=10, anchor=tk.CENTER)
-
-    window_width = root.winfo_screenwidth()
-    control_panel.place(x=window_width - 250, y=10)
+    control_panel.place(x=20, y=450) # Control panel position
 
     create_new_plane()
     create_outgoing_plane()
