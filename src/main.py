@@ -49,7 +49,7 @@ def main():
     create_new_plane()
     create_outgoing_plane()
     atc_simulator.update_planes()
-
+    atc_simulator.refresh_outgoing_flights_list()
     root.mainloop()
 
 

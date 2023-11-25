@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 from planes import Plane, OutgoingPlane
 
 import json
+import re
 
 with open('../data/flight_data.json', 'r') as file:  # Load Possible Flights
     flight_data = json.load(file)
@@ -88,7 +89,7 @@ class ATCSimulator:
         self.control_panel = control_panel
 
     def setup_listbox_callbacks(self):
-        """Setup the callbacks for the listboxes"""
+        """Setup the callbacks for the listboxes when item is selected"""
         self.incoming_flights_listbox.bind("<<ListboxSelect>>", lambda event,
                                                                        flight_listbox=self.incoming_flights_listbox: self.show_flight_details(
             event, flight_listbox))
@@ -112,12 +113,12 @@ class ATCSimulator:
                     break
             for flight in arrivals:
                 if flight['flight_number'] == flight_number:
-                    flight_details = f"Flight Details\nFlight No:{flight['flight_number']}\n{flight['aircraft']}\n{flight['departure_airport']} to {flight['arrival_airport']}\nSpeed: {round(plane.speed*28,2)} Knts\nStatus: {plane.status}"
+                    flight_details = f"Flight Details\nFlight No:{flight['flight_number']}\n{flight['aircraft']}\n{flight['departure_airport']} to {flight['arrival_airport']}\nSpeed: {round(plane.speed * 28, 2)} Knts\nStatus: {plane.status}"
                     break
             else:
                 for flight in departures:
                     if flight['flight_number'] == flight_number:
-                        flight_details = f"Flight Details\nFlight No:{flight['flight_number']}\n{flight['aircraft']}\n{flight['departure_airport']} to {flight['arrival_airport']}\nSpeed: {round(plane.speed*28,2)} Knts\nStatus: {plane.status}"
+                        flight_details = f"Flight Details\nFlight No:{flight['flight_number']}\n{flight['aircraft']}\n{flight['departure_airport']} to {flight['arrival_airport']}\nSpeed: {round(plane.speed * 28, 2)} Knts\nStatus: {plane.status}"
                         departure = True
                         break
             self.flight_details_label.place(x=250, y=12, anchor=tk.NW)
@@ -144,14 +145,20 @@ class ATCSimulator:
         """Approve the flight"""
         plane.taxi()
         plane.approved = True
-        self.remove_outgoing_plane_from_listbox(plane)
+        plane.scheduled_time = 0
 
     def delay(self, plane):
         """Delay the flight"""
         plane.delayed += 1
+        plane.scheduled_time += 15
         if plane.delayed == 3:
             print(f"Flight {plane.flight_number} has been delayed 3 times. It will now be cancelled.")
-            self.remove_outgoing_plane_from_listbox(plane)
+            self.flight_cancelled(plane)
+
+    def flight_cancelled(self, plane):
+        """Cancel the flight"""
+        print(f"Flight {plane.flight_number} has been cancelled.")
+        self.remove_outgoing_plane_from_listbox(plane)
 
     def create_plane(self):
         """Schedule a new arrival plane"""
@@ -175,7 +182,7 @@ class ATCSimulator:
                                   aircraft, flight_number, origin, destination, self)
 
         self.planes.append(out_plane)
-        self.update_outgoing_flights_list(flight_number, destination)
+        self.update_outgoing_flights_list(flight_number, destination, out_plane.scheduled_time)
         # Remove the plane from the outgoing flights listbox after 15 seconds
         # (enough time for the plane to go off-screen)
 
@@ -189,7 +196,7 @@ class ATCSimulator:
 
     def remove_outgoing_plane_from_listbox(self, plane):
         """Remove the plane from the listbox (outgoing flights"""
-        flight_info = f"Flight {plane.flight_number} ({plane.destination})"
+        flight_info = f"Flight {plane.flight_number} ({plane.destination}) | (Approved)"
         list_items = self.outgoing_flights_listbox.get(0, tk.END)
         if flight_info in list_items:
             index = list_items.index(flight_info)
@@ -199,8 +206,28 @@ class ATCSimulator:
     def update_incoming_flights_list(self, flight_number, origin):
         self.incoming_flights_listbox.insert(tk.END, f"Flight {flight_number} ({origin})")
 
-    def update_outgoing_flights_list(self, flight_number, destination):
-        self.outgoing_flights_listbox.insert(tk.END, f"Flight {flight_number} ({destination})")
+    def update_outgoing_flights_list(self, flight_number, destination, scheduled_time):
+        self.outgoing_flights_listbox.insert(tk.END, f"Flight {flight_number} ({destination}) | ({scheduled_time})")
+
+    def refresh_outgoing_flights_list(self):
+        """Refresh the outgoing flights time to leave"""
+        if self.simulation_running:
+            self.outgoing_flights_listbox.delete(0, tk.END)
+            for plane in self.planes:
+                if isinstance(plane, OutgoingPlane):
+                    if plane.approved:
+                        self.update_outgoing_flights_list(plane.flight_number, plane.destination, "Approved")
+                        self.remove_outgoing_plane_from_listbox(plane)
+                        break
+                    else:
+                        plane.scheduled_time -= 1
+                    if plane.scheduled_time <= 0:
+                        self.flight_cancelled(plane)
+                        self.planes.remove(plane)
+                    else:
+                        self.update_outgoing_flights_list(plane.flight_number, plane.destination, int(plane.scheduled_time))
+                    #print(plane.scheduled_time)
+        self.root.after(1000, self.refresh_outgoing_flights_list)
 
     def update_planes(self):
         """Update the positions of the planes"""
