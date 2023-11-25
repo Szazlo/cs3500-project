@@ -34,7 +34,7 @@ class Plane:
         self.acceleration_rate = 0.25
         self.has_disappeared = False
         self.scheduled_time = 100
-        self.status = "Delayed" if random.random() < 0.2 else "On time"
+        self.status = "On time"
 
     def move(self):
         if self.has_reached_airport and not self.has_disappeared:  # If the plane has reached the airport and still in
@@ -82,6 +82,7 @@ class Plane:
             elif not self.has_reached_airport:
                 self.status = "Taxiing"
                 self.has_reached_airport = True
+
 
 
 class OutgoingPlane:

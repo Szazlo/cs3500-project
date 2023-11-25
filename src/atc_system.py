@@ -146,6 +146,11 @@ class ATCSimulator:
                 delay.place(x=250, y=195, anchor=tk.NW)
                 self.root.after(5000, lambda: approve.destroy())
                 self.root.after(5000, lambda: delay.destroy())
+            else:
+                delay = ttk.Button(self.root, text="Slow Down",
+                                   command=lambda num=flight_number: self.delay_landing(plane))
+                delay.place(x=250, y=165, anchor=tk.NW)
+                self.root.after(5000, lambda: delay.destroy())
 
             self.root.after(5000, self.hide_flight_details)
 
@@ -173,6 +178,12 @@ class ATCSimulator:
             self.update_rating(-15)
             print(f"Flight {plane.flight_number} has been delayed 3 times. It will now be cancelled.")
             self.flight_cancelled(plane)
+
+    def delay_landing(self, plane):
+        """Delay a landing to avoid a collision"""
+        plane.speed -= 1.5
+        plane.status = "Delayed"
+        self.update_rating(-5)
 
     def flight_cancelled(self, plane):
         """Cancel the flight"""
@@ -254,8 +265,9 @@ class ATCSimulator:
                             self.flight_cancelled(plane)
                             self.planes.remove(plane)
                         else:
-                            self.update_outgoing_flights_list(plane.flight_number, plane.destination, int(plane.scheduled_time))
-                    #print(plane.scheduled_time)
+                            self.update_outgoing_flights_list(plane.flight_number, plane.destination,
+                                                              int(plane.scheduled_time))
+                    # print(plane.scheduled_time)
         self.root.after(1000, self.refresh_outgoing_flights_list)
 
     def update_planes(self):

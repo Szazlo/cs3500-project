@@ -2,11 +2,15 @@ import random
 import tkinter as tk
 from PIL import Image, ImageTk
 from atc_system import ATCSimulator
-
+from intro import Intro, Page
 
 def main():
+    # Create the intro window
+    intro = Intro()
+    intro.run()
+
     root = tk.Tk()
-    root.title("ATC Simulator")
+    root.title("ATC Simulator - Team 20")
 
     background_image = Image.open("../assets/ORK_airport.png")  # Load the background image
     background_photo = ImageTk.PhotoImage(background_image)
@@ -45,6 +49,9 @@ def main():
     stop_button = tk.Button(control_panel, text="Stop", command=atc_simulator.stop_simulation)
     stop_button.pack(side=tk.LEFT, padx=10, pady=10, anchor=tk.CENTER)
     control_panel.place(x=20, y=510)  # Control panel position
+
+    # start intro and wait for it to finish
+
 
     create_new_plane()
     create_outgoing_plane()
