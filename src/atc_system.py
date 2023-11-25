@@ -209,23 +209,33 @@ class ATCSimulator:
     def update_outgoing_flights_list(self, flight_number, destination, scheduled_time):
         self.outgoing_flights_listbox.insert(tk.END, f"Flight {flight_number} ({destination}) | ({scheduled_time})")
 
+    def remove_approved_flight(self, plane):
+        """Remove the flight from the listbox"""
+        flight_info = f"Flight {plane.flight_number} ({plane.destination}) | (Approved)"
+        list_items = self.outgoing_flights_listbox.get(0, tk.END)
+        if flight_info in list_items:
+            index = list_items.index(flight_info)
+            self.outgoing_flights_listbox.delete(index)
+            plane.inlist = False
+
     def refresh_outgoing_flights_list(self):
         """Refresh the outgoing flights time to leave"""
         if self.simulation_running:
             self.outgoing_flights_listbox.delete(0, tk.END)
             for plane in self.planes:
                 if isinstance(plane, OutgoingPlane):
-                    if plane.approved:
-                        self.update_outgoing_flights_list(plane.flight_number, plane.destination, "Approved")
-                        self.remove_outgoing_plane_from_listbox(plane)
-                        break
-                    else:
-                        plane.scheduled_time -= 1
-                    if plane.scheduled_time <= 0:
-                        self.flight_cancelled(plane)
-                        self.planes.remove(plane)
-                    else:
-                        self.update_outgoing_flights_list(plane.flight_number, plane.destination, int(plane.scheduled_time))
+                    if plane.inlist:
+                        if plane.approved:
+                            self.update_outgoing_flights_list(plane.flight_number, plane.destination, "Approved")
+                            self.root.after(16000, lambda: self.remove_approved_flight(plane))
+                            break
+                        else:
+                            plane.scheduled_time -= 1
+                        if plane.scheduled_time <= 0:
+                            self.flight_cancelled(plane)
+                            self.planes.remove(plane)
+                        else:
+                            self.update_outgoing_flights_list(plane.flight_number, plane.destination, int(plane.scheduled_time))
                     #print(plane.scheduled_time)
         self.root.after(1000, self.refresh_outgoing_flights_list)
 

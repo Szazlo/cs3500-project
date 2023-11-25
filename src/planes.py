@@ -112,6 +112,7 @@ class OutgoingPlane:
         self.delayed = 0
         self.status = "Taxiing"
         self.scheduled_time = random.randint(20, 60)
+        self.inlist = True
 
     def taxi(self):
         self.dot = self.canvas.create_oval(self.x, self.y, self.x + 10, self.y + 10, fill="yellow")
