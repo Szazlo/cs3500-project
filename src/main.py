@@ -44,7 +44,7 @@ def main():
     start_button.pack(side=tk.LEFT, padx=10, pady=10, anchor=tk.CENTER)
     stop_button = tk.Button(control_panel, text="Stop", command=atc_simulator.stop_simulation)
     stop_button.pack(side=tk.LEFT, padx=10, pady=10, anchor=tk.CENTER)
-    control_panel.place(x=20, y=450)  # Control panel position
+    control_panel.place(x=20, y=510)  # Control panel position
 
     create_new_plane()
     create_outgoing_plane()

@@ -34,6 +34,7 @@ class ATCSimulator:
         self.planes = []
         self.simulation_running = True
         self.last_click_time = None
+        self.rating = 0
 
         self.setup_gui()
 
@@ -54,6 +55,17 @@ class ATCSimulator:
         above_outgoing_text = "Departing Flights"
         outgoing_flights_label = ttk.Label(self.canvas, text=above_outgoing_text, font=("TkDefaultFont", 20))
         outgoing_flights_label.place(x=20, y=235, anchor=tk.NW)
+
+        rating_text = f"Airport Rating: \n{self.rating}"
+        rating_label = ttk.Label(self.canvas, text=rating_text, font=("TkDefaultFont", 14))
+        rating_label.place(x=20, y=450, anchor=tk.NW)
+
+    def update_rating(self, rating):
+        """Update the airport rating"""
+        self.rating += rating
+        rating_text = f"Airport Rating: \n{self.rating}"
+        rating_label = ttk.Label(self.canvas, text=rating_text, font=("TkDefaultFont", 14))
+        rating_label.place(x=20, y=450, anchor=tk.NW)
 
     def setup_listboxes(self):
         """Setup the listboxes for the GUI,
@@ -146,12 +158,19 @@ class ATCSimulator:
         plane.taxi()
         plane.approved = True
         plane.scheduled_time = 0
+        if plane.delayed == 0:
+            self.update_rating(5)
+        elif plane.delayed == 1:
+            self.update_rating(1)
+        else:
+            self.update_rating(-10)
 
     def delay(self, plane):
         """Delay the flight"""
         plane.delayed += 1
         plane.scheduled_time += 15
         if plane.delayed == 3:
+            self.update_rating(-15)
             print(f"Flight {plane.flight_number} has been delayed 3 times. It will now be cancelled.")
             self.flight_cancelled(plane)
 
