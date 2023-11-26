@@ -6,7 +6,6 @@ from PIL import Image, ImageTk
 from planes import Plane, OutgoingPlane
 
 import json
-import re
 
 with open('../data/flight_data.json', 'r') as file:  # Load Possible Flights
     flight_data = json.load(file)
