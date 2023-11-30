@@ -11,6 +11,7 @@ def main():
 
     root = tk.Tk()
     root.title("ATC Simulator - Team 20")
+    root.iconbitmap("../assets/favicon.ico")
 
     background_image = Image.open("../assets/ORK_airport.png")  # Load the background image
     background_photo = ImageTk.PhotoImage(background_image)
